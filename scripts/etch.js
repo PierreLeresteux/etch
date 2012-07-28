@@ -17,6 +17,7 @@
     // in the markup as "data-button-class"   
     buttonClasses: {
       'default': ['save'],
+      'compact': [['format', 'bold','italic','underline'],['list','unordered-list', 'ordered-list'], ['justify','justify-left','justify-center','justify-right'],'link','save'],
       'all': ['bold', 'italic', 'underline', 'unordered-list', 'ordered-list', 'link', 'clear-formatting', 'save'],
       'title': ['bold', 'italic', 'underline', 'save']
     }
@@ -51,14 +52,30 @@
       'click .etch-link': 'toggleLink',
       'click .etch-image': 'getImage',
       'click .etch-save': 'save',
-      'click .etch-clear-formatting': 'clearFormatting'
+      'click .etch-clear-formatting': 'clearFormatting',
+      'click .etch-editor-buttonEntry': 'entryMenu',
+      'click .etch-editor-entry': 'closeAllEntryMenu'
     },
         
     changeEditable: function() {
       this.setButtonClass();
       // Im assuming that Ill add more functionality here
     },
+    entryMenu: function(e) {
 
+      var $target = $(e.target || e.srcElement);
+      var entryNumber = $target.data('entry');
+      var display = $target.attr('data-display');
+      this.closeAllEntryMenu();
+      if (display == 'false'){
+        $('.etch-editor-entry[data-entry="'+entryNumber+'"]').show('fast');
+        $target.attr('data-display','true');
+      } 
+    },
+    closeAllEntryMenu: function() {
+      $('.etch-editor-entry').hide('fast');
+      $('.etch-editor-buttonEntry span[data-display="true"]').attr('data-display','false');
+    },
     setButtonClass: function() {
       // check the button class of the element being edited and set the associated buttons on the model
       var editorModel = this.model;
@@ -71,13 +88,34 @@
       this.$el.empty();
       var view = this;
       var buttons = this.model.get('buttons');
-            
+      var entryNumber = 0;
+      var nbButton = 0;
       // hide editor panel if there are no buttons in it and exit early
       if (!buttons.length) { $(this.el).hide(); return; }
             
       _.each(this.model.get('buttons'), function(button){
-        var $buttonEl = $('<a href="#" class="etch-editor-button etch-'+ button +'" title="'+ button.replace('-', ' ') +'"><span></span></a>');
-        view.$el.append($buttonEl);
+        if (!_.isArray(button)){
+          var $buttonEl = $('<a href="#" class="etch-editor-button etch-'+ button +'" title="'+ button.replace('-', ' ') +'"><span></span></a>');
+          view.$el.append($buttonEl);
+        }else{
+          var entry;
+          var nbElement=0;
+          _.each(button, function(buttonEntry){
+            if (entry==undefined) {
+              entry = buttonEntry;
+              var $buttonEl = $('<a href="#" class="etch-editor-button etch-editor-buttonEntry etch-'+ entry +'" title="'+ entry.replace('-', ' ') +'"><span data-entry="'+entryNumber+'" data-display="false"></span></a>');
+              view.$el.append($buttonEl);
+            }else{
+              var swiftTop = nbElement * 32 + 5;
+              var swiftLeft = nbButton * 32 + 5;
+              var $entryEl = $('<a style="top:'+swiftTop+'px;left:'+swiftLeft+'px" data-entry="'+entryNumber+'" href="#" class="etch-editor-button etch-editor-entry etch-'+ buttonEntry +'" title="'+ buttonEntry.replace('-', ' ') +'"><span></span></a>');
+              view.$el.append($entryEl);
+            }
+            nbElement++;
+          });
+          entryNumber++;
+        }
+        nbButton++;
       });
             
       $(this.el).show('fast');
