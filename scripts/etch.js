@@ -17,7 +17,7 @@
     // in the markup as "data-button-class"   
     buttonClasses: {
       'default': ['save'],
-      'compact': [['format', 'bold','italic','underline'],['list','unordered-list', 'ordered-list'], ['justify','justify-left','justify-center','justify-right'],'link','save'],
+      'compact': [['format', 'bold','italic','underline'],['list','unordered-list', 'ordered-list'], ['justify','justify-left','justify-center','justify-right'],['font-size','size xs', 'size s', 'size m', 'size l', 'size xl'],'link','save'],
       'all': ['bold', 'italic', 'underline', 'unordered-list', 'ordered-list', 'link', 'clear-formatting', 'save'],
       'title': ['bold', 'italic', 'underline', 'save']
     }
@@ -54,7 +54,8 @@
       'click .etch-save': 'save',
       'click .etch-clear-formatting': 'clearFormatting',
       'click .etch-editor-buttonEntry': 'entryMenu',
-      'click .etch-editor-entry': 'closeAllEntryMenu'
+      'click .etch-editor-entry': 'closeAllEntryMenu',
+      'click .etch-size': 'changeFontSize'
     },
         
     changeEditable: function() {
@@ -225,6 +226,23 @@
       document.execCommand('justifyRight', false, null);
     },
 
+    changeFontSize : function(e) {
+      e.preventDefault();
+      var size = 0;
+      var $target = $(e.target || e.srcElement).parent();
+      if ($target.hasClass('xs')){
+        size = 1;
+      } else if ($target.hasClass('s')){
+        size = 2;
+      } else if ($target.hasClass('m')){
+        size = 3;
+      } else if ($target.hasClass('l')){
+        size = 4;
+      } else if ($target.hasClass('xl')){
+        size = 5;
+      } 
+      document.execCommand('fontSize', false, size);
+    },
     getImage: function(e) {
       e.preventDefault();
 
