@@ -49,13 +49,14 @@
       'click .etch-justify-center': 'justifyCenter',
       'click .etch-justify-right': 'justifyRight',
       'click .etch-ordered-list': 'toggleOrderedList',
-      'click .etch-link': 'toggleLink',
+      'click .etch-link': 'openLinkInput',
       'click .etch-image': 'getImage',
       'click .etch-save': 'save',
       'click .etch-clear-formatting': 'clearFormatting',
       'click .etch-editor-buttonEntry': 'entryMenu',
       'click .etch-editor-entry': 'closeAllEntryMenu',
-      'click .etch-size': 'changeFontSize'
+      'click .etch-size': 'changeFontSize',
+      'keydown .etch-editor-input': 'toggleLink'
     },
         
     changeEditable: function() {
@@ -98,6 +99,10 @@
         if (!_.isArray(button)){
           var $buttonEl = $('<a href="#" class="etch-editor-button etch-'+ button +'" title="'+ button.replace('-', ' ') +'"><span></span></a>');
           view.$el.append($buttonEl);
+          if (button == 'link'){
+            var $linkEditor = $('<input style="top:38px" class="etch-editor-input" type="text" name="link"/>');
+            view.$el.append($linkEditor);
+          }
         }else{
           var entry;
           var nbElement=0;
@@ -166,41 +171,38 @@
       var h3 = document.createElement('h3');
       range.surroundContents(h3);
     },
-
-    urlPrompt: function(callback) {
-      // This uses the default browser UI prompt to get a url.
-      // Override this function if you want to implement a custom UI.
-        
-      var url = prompt('Enter a url', 'http://');
-        
-      // Ensure a new link URL starts with http:// or https:// 
-      // before it's added to the DOM.
-      //
-      // NOTE: This implementation will disallow relative URLs from being added
-      // but will make it easier for users typing external URLs.
-      if (/^((http|https)...)/.test(url)) {
-        callback(url);
-      } else {
-        callback("http://" + url);
-      }
-    },
-    
-    toggleLink: function(e) {
+    openLinkInput: function(e) {
       e.preventDefault();
       var range = window.getSelection().getRangeAt(0);
-
+      this.rangeLink = range;
       // are we in an anchor element?
       if (range.startContainer.parentNode.tagName === 'A' || range.endContainer.parentNode.tagName === 'A') {
-        // unlink anchor
-        document.execCommand('unlink', false, null);
+        var $element = $(range.endContainer.parentNode);
+        if (range.startContainer.parentNode.tagName === 'A')
+          $element = $(range.startContainer.parentNode);
+        $('input[name=link]').val($element.attr("href"));
       } else {
-        // promt for url and create link
-        this.urlPrompt(function(url) {
-          document.execCommand('createLink', false, url);
-        });
+        $('input[name=link]').val('http://');
+      }
+      $('input[name=link]').toggle('fast');
+    },
+    toggleLink: function(e) {
+      if (e.keyCode === 13){
+        $('input[name=link]').hide('fast');
+        var range = this.rangeLink;
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        var val = $('input[name=link]').val();
+        if (val!='') {
+          document.execCommand('createlink', false, val);
+        } else {
+          document.execCommand('unlink', false,null );
+        }
+        $('input[name=link]').val('http://');
+        e.preventDefault();
       }
     },
-
     toggleUnorderedList: function(e) {
       e.preventDefault();
       document.execCommand('insertUnorderedList', false, null);
