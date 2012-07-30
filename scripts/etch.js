@@ -100,7 +100,7 @@
           var $buttonEl = $('<a href="#" class="etch-editor-button etch-'+ button +'" title="'+ button.replace('-', ' ') +'"><span></span></a>');
           view.$el.append($buttonEl);
           if (button == 'link'){
-            var $linkEditor = $('<input style="top:38px" class="etch-editor-input" type="text" name="link"/>');
+            var $linkEditor = $('<span class="etch-editor-inputcontainer" style="top:41px;left:0" ><input class="etch-editor-input" type="text" name="link" /></span>');
             view.$el.append($linkEditor);
           }
         }else{
@@ -184,11 +184,11 @@
       } else {
         $('input[name=link]').val('http://');
       }
-      $('input[name=link]').toggle('fast');
+      $('.etch-editor-inputcontainer').toggle('fast');
     },
     toggleLink: function(e) {
       if (e.keyCode === 13){
-        $('input[name=link]').hide('fast');
+        $('.etch-editor-inputcontainer').hide('fast');
         var range = this.rangeLink;
         var sel = window.getSelection();
         sel.removeAllRanges();
